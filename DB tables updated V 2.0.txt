@@ -1,0 +1,192 @@
+
+============================================== Creae table =================================
+
+CREATE TABLE `demographic`
+(
+district_id INT ,
+A2 VARCHAR(2000),
+A3 VARCHAR(2000),
+A4 BIGINT,
+A5 INT,
+A6	INT,
+A7	TINYINT,
+A8	TINYINT,
+A9 	TINYINT,
+A10	INT,
+A11	INT,
+A12	decimal(25,2),
+A13	decimal(25,2),
+A14	INT,
+A15	BIGINT,
+A16	BIGINT,
+CONSTRAINT PK_Demographic PRIMARY KEY(district_id)
+);
+
+/*Note: currently birth number is loading as characters as it is enclosed by quotes*/
+
+CREATE TABLE `client`
+(
+client_id INT,
+`birth number` INT,
+district_id INT,
+CONSTRAINT PK_CLIENT PRIMARY KEY(CLIENT_ID),
+CONSTRAINT FK_DEMOGRAPHIC_CLIENT FOREIGN KEY(DISTRICT_ID) REFERENCES `DEMOGRAPHIC`(district_id)
+);
+
+
+CREATE TABLE `ACCOUNT`
+(
+account_id INT,
+district_id INT,
+frequency VARCHAR(2000),
+`DATE` DATE,
+CONSTRAINT PK_ACCOUNT PRIMARY KEY(ACCOUNT_ID),
+CONSTRAINT FK_ACCOUNT_DEMOGRAPHIC FOREIGN KEY(DISTRICT_ID) REFERENCES `DEMOGRAPHIC`(district_id)
+);
+
+
+CREATE TABLE `disp`
+(
+disp_id INT,
+client_id INT,
+account_id INT,
+`TYPE` VARCHAR(50),
+CONSTRAINT PK_DISPOSITION PRIMARY KEY(disp_id),
+CONSTRAINT FK_DISPOSITION_CLIENT FOREIGN KEY(CLIENT_ID) REFERENCES `CLIENT`(CLIENT_ID),
+CONSTRAINT FK_DISPOSITION_ACCOUNT FOREIGN KEY(ACCOUNT_ID) REFERENCES `ACCOUNT`(ACCOUNT_ID)
+);
+
+CREATE TABLE `Card`
+(
+card_id INT,
+disp_id INT,
+`TYPE` VARCHAR(50),
+`issued` Date ,
+CONSTRAINT PK_CreditCard PRIMARY KEY(CARD_ID),
+CONSTRAINT FK_CREDITCARD_DISPOSITION FOREIGN KEY(DISP_ID) REFERENCES `disp`(DISP_ID)
+);
+
+
+CREATE TABLE `Loan`
+(
+loan_id INT,
+account_id INT,
+`DATE` DATE ,
+amount DECIMAL(25,2),
+duration INT,
+payments DECIMAL(25,2),
+`STATUS` VARCHAR(10),
+CONSTRAINT PK_LOAN PRIMARY KEY(LOAN_ID) ,
+CONSTRAINT FK_LOAN_ACCOUNT FOREIGN KEY(ACCOUNT_ID) REFERENCES `ACCOUNT`(account_ID)
+);
+
+
+CREATE TABLE `ordert`
+(
+order_id INT,
+account_id INT,
+bank_to VARCHAR(2),
+account_to BIGINT,
+amount DECIMAL(25,2),
+K_symbol VARCHAR(20),
+CONSTRAINT PK_order PRIMARY KEY(ORDER_ID),
+CONSTRAINT FK_ORDER_ACCOUNT FOREIGN KEY(ACCOUNT_ID) REFERENCES `ACCOUNT`(ACCOUNT_ID)
+);
+
+CREATE TABLE `transaction`
+(
+trans_id INT,
+account_id INT,
+`DATE` DATE,
+`type` VARCHAR(20),
+operation VARCHAR(100),
+amount DECIMAL(25,2),
+balance DECIMAL(25,2),
+k_symbol VARCHAR(50),
+bank VARCHAR(50),
+`account` BIGINT,
+CONSTRAINT PK_TRANSACTION PRIMARY KEY(TRANS_ID) ,
+CONSTRAINT FK_TRANSACTION_ACCOUNT FOREIGN KEY(aCCOUNT_ID) REFERENCES `ACCOUNT`(ACCOUNT_ID)
+);
+
+
+======================================== (01)demographic table loaded ===============================
+/* Loading Demographic table */
+SET GLOBAL local_infile = TRUE;
+
+LOAD DATA LOCAL INFILE 'E://sql//bankdb//demographic.csv'
+INTO TABLE demographic
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES;
+======================================== (02)client table loaded ===============================
+/* Loading of client table */
+SET GLOBAL local_infile = TRUE;
+
+LOAD DATA LOCAL INFILE 'E://sql//bankdb//client.csv'
+INTO TABLE client
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES;
+
+================================== (3) Account table loaded =====================================
+/* Loading of Account table */
+SET GLOBAL local_infile = true;
+LOAD DATA LOCAL INFILE 'E://sql//bankdb//account.csv'
+INTO TABLE account
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(account_id,district_id,frequency, @vardATE)
+SET `date` = STR_TO_DATE(@vardATE,'%y%m%d');
+
+================================ (04)disp table loaded ==============done
+/* Loading of Disp table */
+SET GLOBAL local_infile = true;
+LOAD DATA LOCAL INFILE 'E://sql//bankdb//
+disp.csv'
+INTO TABLE disp
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES;
+
+==================================== (05) card table loaded =========================================
+/* Loading of Card table */
+SET GLOBAL local_infile = true;
+LOAD DATA LOCAL INFILE 'E://sql//bankdb//card.csv'
+INTO TABLE card
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(card_id,disp_id,type, @vardATE)
+SET `issued` = STR_TO_DATE(@vardATE,'%y%m%d');
+
+================================= (06)loan table loaded ========================
+/* Loading of Loan table */
+SET GLOBAL local_infile = true;
+LOAD DATA LOCAL INFILE 'E://sql//bankdb//loan.csv'
+INTO TABLE loan
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(loan_id,account_id,@vardATE,amount,duration,payments,status)
+SET `date` = STR_TO_DATE(@vardATE,'%y%m%d');
+================================================= (07) ordert table loaded====================
+/* Loading of Order table */
+SET GLOBAL local_infile = TRUE;
+LOAD DATA LOCAL INFILE 'E://sql//bankdb//order.csv'
+INTO TABLE ordert
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES;
+===============================================(08) trans1 loaded======================
+/* Loading of Transaction table */
+SET GLOBAL local_infile = true;
+LOAD DATA LOCAL INFILE 'E://sql//bankdb//trans1.csv'
+INTO TABLE transaction
+FIELDS TERMINATED BY ','
+LINES TERMINATED BY '\n'
+IGNORE 1 LINES
+(trans_id,account_id,@vardATE,type,operation,amount,balance,k_symbol,bank,account)
+SET `date` = STR_TO_DATE(@vardATE,'%y%m%d');
+==============================================================================================
